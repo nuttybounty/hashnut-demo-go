@@ -1,6 +1,6 @@
 # HashNut 示范商城 (Go)
 
-演示如何使用 [hashnut-sdk-go](https://github.com/nuttybounty/hashnut-sdk-go) 对接 HashNut 支付 API（V4 版本）的示范商户应用。支持多链支付（ERC20 / TRC20）。
+演示如何使用 [hashnut-sdk-go](https://github.com/nuttybounty/hashnut-sdk-go) (v4) 对接 HashNut 支付 API（V4 版本）的示范商户应用。支持多链支付（ERC20 / TRC20）。
 
 ## 技术栈
 

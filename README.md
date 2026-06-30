@@ -1,6 +1,6 @@
 # HashNut Demo Shop (Go)
 
-A demo merchant application demonstrating how to integrate with HashNut Payment API (V4) using the [hashnut-sdk-go](https://github.com/nuttybounty/hashnut-sdk-go). Supports multi-chain payment (ERC20 / TRC20).
+A demo merchant application demonstrating how to integrate with HashNut Payment API (V4) using the [hashnut-sdk-go](https://github.com/nuttybounty/hashnut-sdk-go) (v4). Supports multi-chain payment (ERC20 / TRC20).
 
 ## Tech Stack
 
