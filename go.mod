@@ -6,7 +6,7 @@ require (
 	github.com/gin-contrib/cors v1.7.3
 	github.com/gin-gonic/gin v1.10.0
 	github.com/google/uuid v1.6.0
-	github.com/hashnut/hashnut-go-sdk v0.0.0
+	github.com/nuttybounty/hashnut-sdk-go v0.1.0
 	github.com/lib/pq v1.10.9
 	github.com/spf13/viper v1.16.0
 )
@@ -50,4 +50,6 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/hashnut/hashnut-go-sdk => ../payment-sdk-go
+
+// For local development, uncomment the following line:
+// replace github.com/nuttybounty/hashnut-sdk-go => ../payment-sdk-go

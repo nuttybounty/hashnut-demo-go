@@ -8,8 +8,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
-	hashnut "github.com/hashnut/hashnut-go-sdk"
-	sdkmodel "github.com/hashnut/hashnut-go-sdk/model"
+	hashnut "github.com/nuttybounty/hashnut-sdk-go"
+	sdkmodel "github.com/nuttybounty/hashnut-sdk-go/model"
 
 	"hashnut-demo-shop/internal/config"
 	"hashnut-demo-shop/internal/model"
