@@ -77,15 +77,15 @@ func (h *Handler) ListChains(c *gin.Context) {
 }
 
 // CreateOrder POST /api/orders
-// Body: { "productId": 1, "chainCode": "erc20", "coinCode": "usdt" }
+// Body: { "productId": 1, "blockChain": "ETH", "tokenSymbol": "usdt" }
 func (h *Handler) CreateOrder(c *gin.Context) {
 	var req struct {
-		ProductID int    `json:"productId" binding:"required"`
-		ChainCode string `json:"chainCode" binding:"required"`
-		CoinCode  string `json:"coinCode" binding:"required"`
+		ProductID   int    `json:"productId" binding:"required"`
+		BlockChain  string `json:"blockChain" binding:"required"`
+		TokenSymbol string `json:"tokenSymbol" binding:"required"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "productId, chainCode, coinCode are required"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "productId, blockChain, tokenSymbol are required"})
 		return
 	}
 
@@ -95,9 +95,9 @@ func (h *Handler) CreateOrder(c *gin.Context) {
 		return
 	}
 
-	apiKey, err := h.store.GetApiKey(req.ChainCode)
+	apiKey, err := h.store.GetApiKey(req.BlockChain)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "unsupported chain: " + req.ChainCode})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "unsupported chain: " + req.BlockChain})
 		return
 	}
 
@@ -107,8 +107,8 @@ func (h *Handler) CreateOrder(c *gin.Context) {
 	payOrder, err := sdk.CreateOrder(&sdkmodel.CreateOrderRequest{
 		AccessKeyID:     apiKey.AccessKeyID,
 		MerchantOrderID: orderNo,
-		ChainCode:       req.ChainCode,
-		CoinCode:        req.CoinCode,
+		BlockChain:      req.BlockChain,
+		TokenSymbol:     req.TokenSymbol,
 		Amount:          product.Price,
 		SplitterAddress: apiKey.Splitter,
 		Subject:         product.Name,
@@ -124,8 +124,8 @@ func (h *Handler) CreateOrder(c *gin.Context) {
 		OrderNo:        orderNo,
 		ProductID:      product.ID,
 		Amount:         product.Price,
-		ChainCode:      req.ChainCode,
-		CoinCode:       req.CoinCode,
+		BlockChain:     req.BlockChain,
+		TokenSymbol:    req.TokenSymbol,
 		PayOrderID:     payOrder.PayOrderID,
 		AccessSign:     payOrder.AccessSign,
 		ReceiptAddress: payOrder.ReceiptAddress,
@@ -151,7 +151,7 @@ func (h *Handler) GetOrder(c *gin.Context) {
 
 	// If still paying, query HashNut for latest status
 	if order.Status == "paying" && order.PayOrderID != "" {
-		apiKey, err := h.store.GetApiKey(order.ChainCode)
+		apiKey, err := h.store.GetApiKey(order.BlockChain)
 		if err == nil {
 			sdk := h.getClient(apiKey.SecretKey)
 			payOrder, err := sdk.QueryOrder(&sdkmodel.QueryOrderRequest{
@@ -175,18 +175,20 @@ func (h *Handler) GetOrder(c *gin.Context) {
 }
 
 func mapHashNutState(state int) string {
-	switch {
-	case state == sdkmodel.OrderStateInit:
+	switch state {
+	case sdkmodel.OrderStateInit, sdkmodel.OrderStatePaid:
 		return "paying"
-	case state == sdkmodel.OrderStatePaid || state == sdkmodel.OrderStateConfirming:
-		return "paying"
-	case state == sdkmodel.OrderStateSuccess || state == sdkmodel.OrderStateFinish:
-		return "paid"
-	case state == sdkmodel.OrderStateFailed:
+	case sdkmodel.OrderStateConfirming:
+		return "confirming"
+	case sdkmodel.OrderStateSuccess:
+		return "fund received"
+	case sdkmodel.OrderStateFinish:
+		return "finish"
+	case sdkmodel.OrderStateFailed:
 		return "failed"
-	case state == sdkmodel.OrderStateExpired:
+	case sdkmodel.OrderStateExpired:
 		return "expired"
-	case state == sdkmodel.OrderStateCanceled:
+	case sdkmodel.OrderStateCanceled:
 		return "canceled"
 	default:
 		return "paying"
@@ -211,9 +213,9 @@ func (h *Handler) ConfirmPaid(c *gin.Context) {
 		return
 	}
 
-	apiKey, err := h.store.GetApiKey(order.ChainCode)
+	apiKey, err := h.store.GetApiKey(order.BlockChain)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "chain config not found: " + order.ChainCode})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "chain config not found: " + order.BlockChain})
 		return
 	}
 
@@ -223,7 +225,6 @@ func (h *Handler) ConfirmPaid(c *gin.Context) {
 		MerchantOrderID: order.OrderNo,
 		AccessSign:      order.AccessSign,
 		PayTxID:         req.PayTxID,
-		ChainCode:       order.ChainCode,
 	}); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "confirm failed: " + err.Error()})
 		return

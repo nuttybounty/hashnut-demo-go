@@ -7,7 +7,7 @@ require (
 	github.com/gin-gonic/gin v1.10.0
 	github.com/google/uuid v1.6.0
 	github.com/lib/pq v1.10.9
-	github.com/nuttybounty/hashnut-sdk-go/v4 v4.0.1
+	github.com/nuttybounty/hashnut-sdk-go/v4 v4.0.2
 	github.com/spf13/viper v1.16.0
 )
 
@@ -51,4 +51,4 @@ require (
 )
 
 // For local development, uncomment the following line:
-replace github.com/nuttybounty/hashnut-sdk-go/v4 => ../payment-sdk-go
+// replace github.com/nuttybounty/hashnut-sdk-go/v4 => ../payment-sdk-go

@@ -37,9 +37,9 @@ psql -U postgres -c "CREATE DATABASE demo_shop;"
 编辑 `migrate.sql`，填入你的 API 密钥：
 
 ```sql
-INSERT INTO t_hashnut_api_key (chain_code, splitter, access_key_id, secret_key) VALUES
-    ('erc20', '0x...你的ETH分账合约地址...', '你的access-key-id', '你的secret-key'),
-    ('trc20', 'T...你的Tron分账合约地址',    '你的access-key-id', '你的secret-key');
+INSERT INTO t_hashnut_api_key (block_chain, splitter, access_key_id, secret_key) VALUES
+    ('ETH',  '0x...你的ETH分账合约地址...', '你的access-key-id', '你的secret-key'),
+    ('TRON', 'T...你的Tron分账合约地址',    '你的access-key-id', '你的secret-key');
 ```
 
 然后执行：
@@ -133,7 +133,7 @@ ngrok http 1800
 |------|------|------|
 | GET | `/api/products` | 获取商品列表 |
 | GET | `/api/chains` | 获取支持的链+币种（从数据库读取） |
-| POST | `/api/orders` | 创建订单 `{productId, chainCode, coinCode}` |
+| POST | `/api/orders` | 创建订单 `{productId, blockChain, tokenSymbol}` |
 | GET | `/api/orders/:id` | 查询订单状态 |
 | POST | `/api/orders/:id/confirm` | 提交支付交易哈希 `{payTxId}` |
 | POST | `/api/notify` | HashNut 支付结果回调 |
@@ -142,10 +142,10 @@ ngrok http 1800
 
 | 表 | 说明 |
 |----|------|
-| `t_coin_info` | 支持的链+币种配置 |
+| `t_coin_info` | 支持的区块链+币种配置 |
 | `t_hashnut_api_key` | 每条链的 splitter 地址 + API 密钥 |
-| `products` | 商品（只有价格，不绑定链/币种） |
-| `orders` | 订单（记录用户选择的链+币种） |
+| `products` | 商品（只有价格，不绑定区块链/币种） |
+| `orders` | 订单（记录用户选择的区块链+币种） |
 
 ## 许可证
 

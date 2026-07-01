@@ -33,7 +33,7 @@ func main() {
 
 	s := store.New(db)
 	h := handler.New(s, &cfg.HashNut)
-	n := notify.New(s)
+	n := notify.New(s, &cfg.HashNut)
 
 	r := gin.Default()
 	r.Use(cors.Default())

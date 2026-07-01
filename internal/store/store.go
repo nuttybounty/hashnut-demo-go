@@ -61,10 +61,10 @@ func (s *Store) GetProduct(id int) (*model.Product, error) {
 
 func (s *Store) ListSupportedChains() ([]model.CoinInfo, error) {
 	rows, err := s.db.Query(
-		`SELECT c.chain_code, c.coin_code, c.chain_label, c.coin_label, c.contract_address, c.decimals
+		`SELECT c.block_chain, c.token_symbol, c.chain_label, c.coin_label, c.contract_address, c.decimals
 		 FROM t_coin_info c
-		 INNER JOIN t_hashnut_api_key k ON c.chain_code = k.chain_code
-		 ORDER BY c.chain_code, c.coin_code`)
+		 INNER JOIN t_hashnut_api_key k ON c.block_chain = k.block_chain
+		 ORDER BY c.block_chain, c.token_symbol`)
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +73,7 @@ func (s *Store) ListSupportedChains() ([]model.CoinInfo, error) {
 	var coins []model.CoinInfo
 	for rows.Next() {
 		var c model.CoinInfo
-		if err := rows.Scan(&c.ChainCode, &c.CoinCode, &c.ChainLabel, &c.CoinLabel, &c.ContractAddress, &c.Decimals); err != nil {
+		if err := rows.Scan(&c.BlockChain, &c.TokenSymbol, &c.ChainLabel, &c.CoinLabel, &c.ContractAddress, &c.Decimals); err != nil {
 			return nil, err
 		}
 		coins = append(coins, c)
@@ -81,12 +81,12 @@ func (s *Store) ListSupportedChains() ([]model.CoinInfo, error) {
 	return coins, nil
 }
 
-func (s *Store) GetApiKey(chainCode string) (*model.ApiKeyInfo, error) {
+func (s *Store) GetApiKey(blockChain string) (*model.ApiKeyInfo, error) {
 	var a model.ApiKeyInfo
 	err := s.db.QueryRow(
-		`SELECT chain_code, splitter, access_key_id, secret_key FROM t_hashnut_api_key WHERE chain_code=$1`,
-		chainCode,
-	).Scan(&a.ChainCode, &a.Splitter, &a.AccessKeyID, &a.SecretKey)
+		`SELECT block_chain, splitter, access_key_id, secret_key FROM t_hashnut_api_key WHERE block_chain=$1`,
+		blockChain,
+	).Scan(&a.BlockChain, &a.Splitter, &a.AccessKeyID, &a.SecretKey)
 	if err != nil {
 		return nil, err
 	}
@@ -97,9 +97,9 @@ func (s *Store) GetApiKey(chainCode string) (*model.ApiKeyInfo, error) {
 
 func (s *Store) CreateOrder(o *model.Order) error {
 	return s.db.QueryRow(
-		`INSERT INTO orders (order_no, product_id, amount, chain_code, coin_code, pay_order_id, access_sign, receipt_address, pay_url, status)
+		`INSERT INTO orders (order_no, product_id, amount, block_chain, token_symbol, pay_order_id, access_sign, receipt_address, pay_url, status)
 		 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id, created_at, updated_at`,
-		o.OrderNo, o.ProductID, o.Amount, o.ChainCode, o.CoinCode,
+		o.OrderNo, o.ProductID, o.Amount, o.BlockChain, o.TokenSymbol,
 		o.PayOrderID, o.AccessSign, o.ReceiptAddress, o.PayURL, o.Status,
 	).Scan(&o.ID, &o.CreatedAt, &o.UpdatedAt)
 }
@@ -107,14 +107,14 @@ func (s *Store) CreateOrder(o *model.Order) error {
 func (s *Store) GetOrder(orderNo string) (*model.Order, error) {
 	var o model.Order
 	err := s.db.QueryRow(
-		`SELECT o.id, o.order_no, o.product_id, o.amount, o.chain_code, o.coin_code,
+		`SELECT o.id, o.order_no, o.product_id, o.amount, o.block_chain, o.token_symbol,
 		        COALESCE(o.pay_order_id,''), COALESCE(o.access_sign,''),
 		        COALESCE(o.receipt_address,''), COALESCE(o.pay_url,''),
 		        COALESCE(o.pay_tx_id,''), o.status, o.created_at, o.updated_at,
 		        p.name
 		 FROM orders o JOIN products p ON o.product_id = p.id
 		 WHERE o.order_no = $1`, orderNo,
-	).Scan(&o.ID, &o.OrderNo, &o.ProductID, &o.Amount, &o.ChainCode, &o.CoinCode,
+	).Scan(&o.ID, &o.OrderNo, &o.ProductID, &o.Amount, &o.BlockChain, &o.TokenSymbol,
 		&o.PayOrderID, &o.AccessSign, &o.ReceiptAddress, &o.PayURL,
 		&o.PayTxID, &o.Status, &o.CreatedAt, &o.UpdatedAt, &o.ProductName)
 	if err != nil {
@@ -134,12 +134,12 @@ func (s *Store) UpdateOrderStatus(orderNo, status, payTxID string) error {
 func (s *Store) FindOrderByPayOrderID(payOrderID string) (*model.Order, error) {
 	var o model.Order
 	err := s.db.QueryRow(
-		`SELECT id, order_no, product_id, amount, chain_code, coin_code,
+		`SELECT id, order_no, product_id, amount, block_chain, token_symbol,
 		        COALESCE(pay_order_id,''), COALESCE(access_sign,''),
 		        COALESCE(receipt_address,''), COALESCE(pay_url,''),
 		        COALESCE(pay_tx_id,''), status, created_at, updated_at
 		 FROM orders WHERE pay_order_id = $1`, payOrderID,
-	).Scan(&o.ID, &o.OrderNo, &o.ProductID, &o.Amount, &o.ChainCode, &o.CoinCode,
+	).Scan(&o.ID, &o.OrderNo, &o.ProductID, &o.Amount, &o.BlockChain, &o.TokenSymbol,
 		&o.PayOrderID, &o.AccessSign, &o.ReceiptAddress, &o.PayURL,
 		&o.PayTxID, &o.Status, &o.CreatedAt, &o.UpdatedAt)
 	if err != nil {

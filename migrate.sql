@@ -7,22 +7,22 @@ DROP TABLE IF EXISTS t_hashnut_api_key;
 
 -- 支持的链+币种（前端从这里读取可用支付选项）
 CREATE TABLE t_coin_info (
-    chain_code       VARCHAR(32)  NOT NULL,
-    coin_code        VARCHAR(32)  NOT NULL,
+    block_chain      VARCHAR(32)  NOT NULL,
+    token_symbol     VARCHAR(32)  NOT NULL,
     chain_label      VARCHAR(64)  NOT NULL DEFAULT '',
     coin_label       VARCHAR(64)  NOT NULL DEFAULT '',
     contract_address VARCHAR(128) NOT NULL DEFAULT '',
     decimals         INT          NOT NULL DEFAULT 6,
-    PRIMARY KEY (chain_code, coin_code)
+    PRIMARY KEY (block_chain, token_symbol)
 );
 
 -- 每条链的 splitter 地址和对应的 API 密钥
 CREATE TABLE t_hashnut_api_key (
-    chain_code    VARCHAR(32)  NOT NULL,
+    block_chain   VARCHAR(32)  NOT NULL,
     splitter      VARCHAR(128) NOT NULL,
     access_key_id VARCHAR(128) NOT NULL,
     secret_key    VARCHAR(128) NOT NULL,
-    PRIMARY KEY (chain_code)
+    PRIMARY KEY (block_chain)
 );
 
 -- 商品表（不绑定具体链/币种，由前端用户选择）
@@ -41,8 +41,8 @@ CREATE TABLE orders (
     order_no         VARCHAR(64) NOT NULL UNIQUE,
     product_id       INT NOT NULL REFERENCES products(id),
     amount           NUMERIC(18,6) NOT NULL,
-    chain_code       VARCHAR(32) NOT NULL,
-    coin_code        VARCHAR(32) NOT NULL,
+    block_chain      VARCHAR(32) NOT NULL,
+    token_symbol     VARCHAR(32) NOT NULL,
     pay_order_id     VARCHAR(64),
     access_sign      VARCHAR(256),
     receipt_address  VARCHAR(128),
@@ -56,14 +56,14 @@ CREATE TABLE orders (
 -- ======== Seed Data ========
 
 -- 链+币种配置（根据实际部署的链来配置）
-INSERT INTO t_coin_info (chain_code, coin_code, chain_label, coin_label, contract_address, decimals) VALUES
-    ('erc20', 'usdt', 'Ethereum', 'USDT', lower('0xdAC17F958D2ee523a2206206994597C13D831ec7'), 6),
-    ('trc20', 'usdt', 'Tron',     'USDT', 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t',6);
+INSERT INTO t_coin_info (block_chain, token_symbol, chain_label, coin_label, contract_address, decimals) VALUES
+    ('ETH',  'usdt', 'Ethereum', 'USDT', lower('0xdAC17F958D2ee523a2206206994597C13D831ec7'), 6),
+    ('TRON', 'usdt', 'Tron',     'USDT', 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t', 6);
 
 -- API Key 配置（每条链一个 splitter + 对应的 API 密钥）
-INSERT INTO t_hashnut_api_key (chain_code, splitter, access_key_id, secret_key) VALUES
-    ('erc20', '${split address}',  '${access-key-id}', 'secret-key'),
-    ('trc20', '${split address}', '${access-key-id}', 'secret-key');
+INSERT INTO t_hashnut_api_key (block_chain, splitter, access_key_id, secret_key) VALUES
+    ('ETH',  '${split address}',  '${access-key-id}', 'secret-key'),
+    ('TRON', '${split address}', '${access-key-id}', 'secret-key');
 
 -- 商品数据
 INSERT INTO products (name, description, price, image_url) VALUES

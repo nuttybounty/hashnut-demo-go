@@ -16,8 +16,8 @@ type Order struct {
 	OrderNo        string    `json:"orderNo"`
 	ProductID      int       `json:"productId"`
 	Amount         string    `json:"amount"`
-	ChainCode      string    `json:"chainCode"`
-	CoinCode       string    `json:"coinCode"`
+	BlockChain     string    `json:"blockChain"`
+	TokenSymbol    string    `json:"tokenSymbol"`
 	PayOrderID     string    `json:"payOrderId,omitempty"`
 	AccessSign     string    `json:"accessSign,omitempty"`
 	ReceiptAddress string    `json:"receiptAddress,omitempty"`
@@ -32,8 +32,8 @@ type Order struct {
 }
 
 type CoinInfo struct {
-	ChainCode       string `json:"chain_code"`
-	CoinCode        string `json:"coin_code"`
+	BlockChain      string `json:"block_chain"`
+	TokenSymbol     string `json:"token_symbol"`
 	ChainLabel      string `json:"chain_label"`
 	CoinLabel       string `json:"coin_label"`
 	ContractAddress string `json:"contract_address"`
@@ -41,7 +41,7 @@ type CoinInfo struct {
 }
 
 type ApiKeyInfo struct {
-	ChainCode   string
+	BlockChain  string
 	Splitter    string
 	AccessKeyID string
 	SecretKey   string

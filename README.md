@@ -37,9 +37,9 @@ psql -U postgres -c "CREATE DATABASE demo_shop;"
 Edit `migrate.sql` to fill in your API credentials:
 
 ```sql
-INSERT INTO t_hashnut_api_key (chain_code, splitter, access_key_id, secret_key) VALUES
-    ('erc20', '0x...your-eth-splitter...', 'your-access-key-id', 'your-secret-key'),
-    ('trc20', 'T...your-tron-splitter',    'your-access-key-id', 'your-secret-key');
+INSERT INTO t_hashnut_api_key (block_chain, splitter, access_key_id, secret_key) VALUES
+    ('ETH',  '0x...your-eth-splitter...', 'your-access-key-id', 'your-secret-key'),
+    ('TRON', 'T...your-tron-splitter',    'your-access-key-id', 'your-secret-key');
 ```
 
 Then run:
@@ -133,7 +133,7 @@ Browser (localhost:5173)
 |--------|------|-------------|
 | GET | `/api/products` | List all products |
 | GET | `/api/chains` | List supported chains + coins (from DB) |
-| POST | `/api/orders` | Create order `{productId, chainCode, coinCode}` |
+| POST | `/api/orders` | Create order `{productId, blockChain, tokenSymbol}` |
 | GET | `/api/orders/:id` | Query order status |
 | POST | `/api/orders/:id/confirm` | Submit payment tx hash `{payTxId}` |
 | POST | `/api/notify` | HashNut payment result webhook |
@@ -142,10 +142,10 @@ Browser (localhost:5173)
 
 | Table | Description |
 |-------|-------------|
-| `t_coin_info` | Supported chain + coin configurations |
-| `t_hashnut_api_key` | Splitter address + API credentials per chain |
-| `products` | Demo products (price only, no chain/coin binding) |
-| `orders` | Orders with user-selected chain + coin |
+| `t_coin_info` | Supported blockchain + token configurations |
+| `t_hashnut_api_key` | Splitter address + API credentials per blockchain |
+| `products` | Demo products (price only, no blockchain/token binding) |
+| `orders` | Orders with user-selected blockchain + token |
 
 ## Project Structure
 
